@@ -1,12 +1,17 @@
 package seedu.address.logic.commands;
 
+import java.util.HashSet;
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.logic.phase.Phase;
 import seedu.address.model.Model;
 
 /**
  * Represents a command with hidden internal logic and the ability to be executed.
  */
 public abstract class Command {
+
+    public Phase nextPhase;
+    public HashSet<Phase> allowedPhases;
 
     /**
      * Executes the command and returns the result message.
