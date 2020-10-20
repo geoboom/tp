@@ -1,4 +1,5 @@
 # User Guide
+
 Team Name: AY2021S1-CS2103T-T09-4
 
 GreenTea is a **desktop app for learning a new language, optimized for use via a Command Line Interface** (CLI) while still having the benefits of a Graphical User Interface (GUI). If you like to use a FlashCard system to learn new languages, this app would be perfect for you. In this User Guide (UG), you will learn about the various commands and actions that would allow you to use GreenTea seamlessly.
@@ -19,7 +20,6 @@ GreenTea is a **desktop app for learning a new language, optimized for use via a
   - [Saving the data](#saving-the-data)
   - [FAQ (WIP)](#faq-wip)
   - [Command summary](#command-summary)
-
 
 ### Viewing help: `help`
 
@@ -47,7 +47,6 @@ Format: `remove <INDEX OF DECK>`
 
 Examples: `remove 1`
 
-
 ### Selecting a deck: `select`
 
 Selects a deck to perform deck-level operations on
@@ -57,7 +56,6 @@ Format: `select <INDEX OF DECK>`
 **Note:** to get the index of a deck, you may view it on the GUI. It would be the number displayed beside a particular deck
 
 Examples: `select 1`
-
 
 ### ===== ENTRY OPERATIONS ====
 
@@ -89,17 +87,15 @@ Format: `edit <INDEX> w/<WORD> t/<TRANSLATION>` OR `edit <INDEX> w/<WORD>` OR `e
 
 Examples:
 
-- `edit 1 w/hello` edits the word in  `entry#1` to `hello`.
-- `edit 1 t/こんにちは` edits the translation in  `entry#1` to `こんにちは`
-- `edit 1 w/hello t/こんにちは` edits the word and translation in  `entry#1` to `hello` and `こんにちは` respectively.
+- `edit 1 w/hello` edits the word in `entry#1` to `hello`.
+- `edit 1 t/こんにちは` edits the translation in `entry#1` to `こんにちは`
+- `edit 1 w/hello t/こんにちは` edits the word and translation in `entry#1` to `hello` and `こんにちは` respectively.
 
 ### Deleting an entry: `delete`
 
 Delete the entry whose index is `INDEX`.
 
 Format: `delete <INDEX>`
-
-
 
 **Note:** to get the index of an entry, you may run `list` - the index would be shown beside its respective entry
 
@@ -130,23 +126,19 @@ Entries ares saved in the hard disk automatically after any command that changes
 
 ## Command summary
 
-| Action     | Format, Examples                                                                                                      |
-| ---------- | --------------------------------------------------------------------------------------------------------------------- |
-| **Help**   | `help`                                                                                                                |
-| **New**    | `new <NAME OF NEW DECK>`  e.g. `new Japanese-Animals`                                                                 |
-| **Remove** | `remove <INDEXOF DECK>` e.g. `remove 1`                                                                               |
-| **Select** | `select <INDEXOF DECK>` e.g. `select 1`                                                                               |
-|*****************************************************************                                                                   |
-|**Select a Deck before Using the following Commands**                                                                               | 
-|*****************************************************************                                                                   |
-| **Add**    | `add w/<WORD> t/<TRANSLATION>` e.g. `add w/Hello t/hola`                                                              |
-| **List**   | `list`                                                                                                                |
-| **Edit**   | `edit <INDEX> w/<WORD> t/<TRANSLATION>` OR `edit <INDEX> w/<WORD>` OR `edit <INDEX> t/<TRANSLATION>`                  |
-|            |   e.g. `edit 1 w/hello t/こんにちは` OR `edit 1 w/hello` OR `edit 1 t/こんにちは`                                      |
-| **Delete** | `delete <INDEX>` e.g. `delete 3`                                                                                      |
-| **Clear**  | `clear`                                                                                                               |
-| **Exit**   | `exit`                                                                                                                |
-
-
-
-
+| Action                                                             | Format, Examples                                                                                     |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| **Help**                                                           | `help`                                                                                               |
+| **New**                                                            | `new <NAME OF NEW DECK>` e.g. `new Japanese-Animals`                                                 |
+| **Remove**                                                         | `remove <INDEXOF DECK>` e.g. `remove 1`                                                              |
+| **Select**                                                         | `select <INDEXOF DECK>` e.g. `select 1`                                                              |
+| ********************************\********************************* |
+| **Select a Deck before Using the following Commands**              |
+| ********************************\********************************* |
+| **Add**                                                            | `add w/<WORD> t/<TRANSLATION>` e.g. `add w/Hello t/hola`                                             |
+| **List**                                                           | `list`                                                                                               |
+| **Edit**                                                           | `edit <INDEX> w/<WORD> t/<TRANSLATION>` OR `edit <INDEX> w/<WORD>` OR `edit <INDEX> t/<TRANSLATION>` |
+|                                                                    | e.g. `edit 1 w/hello t/こんにちは` OR `edit 1 w/hello` OR `edit 1 t/こんにちは`                      |
+| **Delete**                                                         | `delete <INDEX>` e.g. `delete 3`                                                                     |
+| **Clear**                                                          | `clear`                                                                                              |
+| **Exit**                                                           | `exit`                                                                                               |
