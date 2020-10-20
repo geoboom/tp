@@ -12,6 +12,8 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.logic.phase.PhaseManager;
+import seedu.address.logic.phase.exceptions.PhaseInvalidException;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.deck.Deck;
@@ -22,11 +24,13 @@ import seedu.address.storage.Storage;
  * The main LogicManager of the app.
  */
 public class LogicManager implements Logic {
+
     public static final String FILE_OPS_ERROR_MESSAGE = "Could not save data to file: ";
     private final Logger logger = LogsCenter.getLogger(LogicManager.class);
 
     private final Model model;
     private final Storage storage;
+    private final PhaseManager phaseManager;
     private final AddressBookParser addressBookParser;
 
     /**
@@ -35,20 +39,28 @@ public class LogicManager implements Logic {
     public LogicManager(Model model, Storage storage) {
         this.model = model;
         this.storage = storage;
+        this.phaseManager = new PhaseManager();
         addressBookParser = new AddressBookParser();
     }
 
     @Override
-    public CommandResult execute(String commandText) throws CommandException, ParseException {
-        logger.info("----------------[USER COMMAND][" + commandText + "]");
+    public CommandResult execute(String commandText)
+        throws CommandException, ParseException, PhaseInvalidException {
+        logger.info(String.format("----------------[USER COMMAND][%s]", commandText));
 
-        CommandResult commandResult;
         Command command = addressBookParser.parseCommand(commandText);
-        commandResult = command.execute(model);
+
+        // bubble error up to UI
+        if (!phaseManager.commandAllowed(command)) {
+            throw new PhaseInvalidException(String
+                .format("[%s] command not allowed in phase [%s]", command.getClass().toString(),
+                    phaseManager.getPhase()));
+        }
+
+        CommandResult commandResult = command.execute(model);
 
         try {
             storage.saveAddressBook(model.getAddressBook());
-
         } catch (IOException ioe) {
             throw new CommandException(FILE_OPS_ERROR_MESSAGE + ioe, ioe);
         }
