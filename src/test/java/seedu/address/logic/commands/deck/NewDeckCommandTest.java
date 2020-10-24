@@ -24,6 +24,8 @@ import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.deck.Deck;
 import seedu.address.model.deck.entry.Entry;
+import seedu.address.model.play.Leitner;
+import seedu.address.model.view.View;
 import seedu.address.testutil.deck.DeckBuilder;
 
 public class NewDeckCommandTest {
@@ -53,6 +55,7 @@ public class NewDeckCommandTest {
         assertThrows(CommandException.class, NewDeckCommand.MESSAGE_DUPLICATE_DECK, () ->
                 newDeckCommand.execute(modelStub));
     }
+
     @Test
     public void equals() {
         Deck japanese = new DeckBuilder().withDeckName("Japanese").build();
@@ -168,7 +171,7 @@ public class NewDeckCommandTest {
         }
 
         @Override
-        public void selectDeck (Index index) {
+        public void selectDeck(Index index) {
             throw new AssertionError("This method should not be called");
         }
 
@@ -194,6 +197,61 @@ public class NewDeckCommandTest {
 
         @Override
         public void clearEntryList() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void newGame() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public String endGame() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void playGame(String answer) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public boolean checkScore() {
+            return true;
+        }
+
+        @Override
+        public boolean checkScoreTwo() {
+            return true;
+        }
+
+        @Override
+        public int editDistance(String answer, String correctAnswer, int answerLength, int correctAnswerLength) {
+            return 10;
+        }
+
+        @Override
+        public void setCurrentView(View view) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public View getCurrentView() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public Leitner getLeitner() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public int getCurrentIndex() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public int getLastScore() {
             throw new AssertionError("This method should not be called.");
         }
     }

@@ -18,6 +18,7 @@ import seedu.address.model.Model;
 import seedu.address.model.deck.entry.Entry;
 import seedu.address.model.deck.entry.Translation;
 import seedu.address.model.deck.entry.Word;
+import seedu.address.model.view.View;
 
 /**
  * Edits the details of an existing entry in the word bank.
@@ -83,6 +84,7 @@ public class EditCommand extends Command {
         model.setEntry(entryToEdit, editedEntry);
         model.updateFilteredEntryList(PREDICATE_SHOW_ALL_ENTRIES);
         model.replaceEntryList();
+        model.setCurrentView(View.ENTRY_VIEW);
         return new CommandResult(String.format(MESSAGE_EDIT_ENTRY_SUCCESS, editedEntry));
     }
 

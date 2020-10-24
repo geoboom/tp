@@ -1,4 +1,4 @@
-package seedu.address.ui;
+package seedu.address.ui.entry;
 
 import java.util.logging.Logger;
 
@@ -9,6 +9,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.model.deck.entry.Entry;
+import seedu.address.ui.UiPart;
 
 /**
  * Panel containing the list of entries.

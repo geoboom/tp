@@ -7,10 +7,12 @@ import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.commons.core.Messages;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.AddressBookParser;
+import seedu.address.logic.parser.PlayModeParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.logic.phase.PhaseManager;
 import seedu.address.logic.phase.exceptions.PhaseInvalidException;
@@ -18,6 +20,8 @@ import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.deck.Deck;
 import seedu.address.model.deck.entry.Entry;
+import seedu.address.model.play.Leitner;
+import seedu.address.model.view.View;
 import seedu.address.storage.Storage;
 
 /**
@@ -32,6 +36,8 @@ public class LogicManager implements Logic {
     private final Storage storage;
     private final PhaseManager phaseManager;
     private final AddressBookParser addressBookParser;
+    private final PlayModeParser playModeParser;
+    private PlayMode playMode = new PlayMode();
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
@@ -41,6 +47,7 @@ public class LogicManager implements Logic {
         this.storage = storage;
         this.phaseManager = new PhaseManager();
         addressBookParser = new AddressBookParser();
+        playModeParser = new PlayModeParser();
     }
 
     @Override
@@ -48,16 +55,40 @@ public class LogicManager implements Logic {
         throws CommandException, ParseException, PhaseInvalidException {
         logger.info(String.format("----------------[USER COMMAND][%s]", commandText));
 
-        Command command = addressBookParser.parseCommand(commandText);
+        // Command command = addressBookParser.parseCommand(commandText);
 
         // bubble error up to UI
-        if (!phaseManager.commandAllowed(command)) {
-            throw new PhaseInvalidException(String
-                .format("[%s] command not allowed in phase [%s]", command.getClass().toString(),
-                    phaseManager.getPhase()));
+        // if (!phaseManager.commandAllowed(command)) {
+        //     throw new PhaseInvalidException(String
+        //         .format("[%s] command not allowed in phase [%s]", command.getClass().toString(),
+        //             phaseManager.getPhase()));
+        // }
+
+        CommandResult commandResult;
+        Command command;
+
+        if (commandText.equals("play")) {
+            assert (!playMode.isPlayMode());
+            if (model.getCurrentDeck() == null) {
+                throw new CommandException(Messages.MESSAGE_NO_DECK_SELECTED);
+            }
+            if (model.getCurrentDeck().getEntries().isEmpty()) {
+                throw new CommandException(Messages.MESSAGE_EMPTY_DECK);
+            }
+            playMode.turnOn();
         }
 
-        CommandResult commandResult = command.execute(model);
+        if (playMode.isPlayMode()) {
+            assert (playMode.isPlayMode());
+            command = playModeParser.parseCommand(commandText);
+            if (commandText.equals("stop") || model.checkScore()) {
+                playMode.turnOff();
+            }
+        } else {
+            command = addressBookParser.parseCommand(commandText);
+        }
+
+        commandResult = command.execute(model);
 
         try {
             storage.saveAddressBook(model.getAddressBook());
@@ -96,5 +127,26 @@ public class LogicManager implements Logic {
     @Override
     public ObservableList<Entry> getFilteredEntryList() {
         return model.getFilteredEntryList();
+    }
+
+    //Methods called by the UI
+    @Override
+    public View getCurrentView() {
+        return model.getCurrentView();
+    }
+
+    @Override
+    public Leitner getLeitner() {
+        return model.getLeitner();
+    }
+
+    @Override
+    public int getCurrentIndex() {
+        return model.getCurrentIndex();
+    }
+
+    @Override
+    public int getLastScore() {
+        return model.getLastScore();
     }
 }

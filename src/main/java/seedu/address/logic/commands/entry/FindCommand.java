@@ -8,6 +8,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.deck.entry.WordContainsKeywordsPredicate;
+import seedu.address.model.view.View;
 
 /**
  * Finds and lists all entries in word bank whose word contains any of the argument keywords.
@@ -35,6 +36,7 @@ public class FindCommand extends Command {
             throw new CommandException(Messages.MESSAGE_NO_DECK_SELECTED);
         }
         model.updateFilteredEntryList(predicate);
+        model.setCurrentView(View.ENTRY_VIEW);
         return new CommandResult(
                 String.format(Messages.MESSAGE_ENTRIES_LISTED_OVERVIEW, model.getFilteredEntryList().size()));
     }

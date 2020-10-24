@@ -8,6 +8,7 @@ import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
+import seedu.address.model.view.View;
 
 /**
  * Lists all entries in the word bank to the user.
@@ -26,6 +27,7 @@ public class ListCommand extends Command {
             throw new CommandException(Messages.MESSAGE_NO_DECK_SELECTED);
         }
         model.updateFilteredEntryList(PREDICATE_SHOW_ALL_ENTRIES);
+        model.setCurrentView(View.ENTRY_VIEW);
         return new CommandResult(MESSAGE_SUCCESS);
     }
 }

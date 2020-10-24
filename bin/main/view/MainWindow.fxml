@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.stage.*?>
 
-<fx:root minHeight="800.0" minWidth="800.0" onCloseRequest="#handleExit" title="Word Bank"
+<fx:root minHeight="800.0" minWidth="1000.0" onCloseRequest="#handleExit" title="Word Bank"
   type="javafx.stage.Stage" xmlns="http://javafx.com/javafx/11.0.3-internal"
   xmlns:fx="http://javafx.com/fxml/1">
   <icons>
@@ -21,7 +21,7 @@
         <URL value="@Extensions.css"/>
       </stylesheets>
 
-      <VBox prefHeight="163.0" prefWidth="340.0">
+      <VBox>
         <MenuBar fx:id="menuBar" VBox.vgrow="NEVER">
           <Menu mnemonicParsing="false" text="File">
             <MenuItem mnemonicParsing="false" onAction="#handleExit" text="Exit"/>
@@ -30,43 +30,37 @@
             <MenuItem fx:id="helpMenuItem" mnemonicParsing="false" onAction="#handleHelp"
               text="Help"/>
           </Menu>
-          <Menu mnemonicParsing="false" text="Deck">
-            <items>
-              <MenuItem fx:id="Deck1" mnemonicParsing="false" onAction="#handleDeck" text="Deck 1"/>
-              <MenuItem fx:id="Deck2" mnemonicParsing="false" onAction="#handleDeck" text="Deck 2"/>
-            </items>
-          </Menu>
         </MenuBar>
-
-        <StackPane fx:id="commandBoxPlaceholder" styleClass="pane-with-border" VBox.vgrow="NEVER">
-          <padding>
-            <Insets bottom="5" left="10" right="10" top="5"/>
-          </padding>
-        </StackPane>
-
-
-        <StackPane fx:id="resultDisplayPlaceholder" maxHeight="100" minHeight="100.0"
-          prefHeight="100.0" styleClass="pane-with-border" VBox.vgrow="NEVER">
-
-          <padding>
-            <Insets bottom="5" left="10" right="10" top="5"/>
-          </padding>
-        </StackPane>
-        <GridPane gridLinesVisible="true" VBox.vgrow="ALWAYS">
-          <StackPane fx:id="deckListPanelPlaceholder" GridPane.columnIndex="0"
-            GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.vgrow="ALWAYS"/>
-          <StackPane fx:id="entryListPanelPlaceholder"
-            GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0"
-            GridPane.vgrow="ALWAYS"/>
-          <columnConstraints>
-            <ColumnConstraints percentWidth="30.0" minWidth="300"/>
-            <ColumnConstraints percentWidth="80.0"/>
-          </columnConstraints>
-          <rowConstraints>
-            <RowConstraints/>
-          </rowConstraints>
-        </GridPane>
-
+        <HBox VBox.vgrow="ALWAYS">
+          <VBox>
+            <StackPane fx:id="deckListPanelPlaceholder" VBox.vgrow="ALWAYS" minWidth="300" maxWidth="300"/>
+          </VBox>
+          <VBox HBox.hgrow="ALWAYS">
+            <TabPane fx:id="tabPanelPlaceholder" VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE" tabMinWidth="150" minWidth="450" minHeight="360">
+              <Tab text="Start">
+                <StackPane fx:id="startPanelPlaceholder" VBox.vgrow="ALWAYS"/>
+              </Tab>
+              <Tab text="Entries">
+                <StackPane fx:id="entryListPanelPlaceholder" VBox.vgrow="ALWAYS"/>
+              </Tab>
+              <Tab text="Quiz">
+                <StackPane fx:id="quizPanelPlaceholder" VBox.vgrow="ALWAYS"/>
+              </Tab>
+              <Tab text="Statistics"></Tab>
+            </TabPane>
+          <StackPane fx:id="resultDisplayPlaceholder" maxHeight="100" minHeight="100.0"
+                     prefHeight="100.0" styleClass="pane-with-border" VBox.vgrow="NEVER">
+            <padding>
+              <Insets bottom="5" left="10" right="10" top="5"/>
+            </padding>
+          </StackPane>
+          <StackPane fx:id="commandBoxPlaceholder" styleClass="pane-with-border" VBox.vgrow="NEVER">
+            <padding>
+              <Insets bottom="5" left="10" right="10" top="5"/>
+            </padding>
+          </StackPane>
+         </VBox>
+        </HBox>
         <StackPane fx:id="statusbarPlaceholder" VBox.vgrow="NEVER"/>
       </VBox>
     </Scene>

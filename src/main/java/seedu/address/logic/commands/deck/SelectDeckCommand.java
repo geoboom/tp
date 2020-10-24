@@ -11,6 +11,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.deck.Deck;
+import seedu.address.model.view.View;
 
 public class SelectDeckCommand extends Command {
 
@@ -41,6 +42,7 @@ public class SelectDeckCommand extends Command {
         model.selectDeck(targetIndex);
         model.replaceEntryList();
         Deck selectedDeck = model.getCurrentDeck();
+        model.setCurrentView(View.ENTRY_VIEW);
         return new CommandResult(String.format(MESSAGE_SELECT_DECK_SUCCESS, selectedDeck));
     }
 

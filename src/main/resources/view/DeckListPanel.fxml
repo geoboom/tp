@@ -3,6 +3,14 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-  <ListView fx:id="deckListView" VBox.vgrow="ALWAYS" maxHeight="500" />
+<?import javafx.scene.control.Label?>
+
+<?import javafx.geometry.Insets?>
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" styleClass="deck-list">
+  <Label text="Decks" styleClass="header" stylesheets="DarkTheme.css" VBox.vgrow="ALWAYS" minWidth="300" maxWidth="300" minHeight="45"></Label>
+  <ListView fx:id="deckListView" VBox.vgrow="ALWAYS" maxHeight="800">
+    <padding>
+      <Insets right="15" left="23"></Insets>
+    </padding>
+  </ListView>
 </VBox>

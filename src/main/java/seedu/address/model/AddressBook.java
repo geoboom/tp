@@ -2,6 +2,8 @@ package seedu.address.model;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javafx.collections.ObservableList;
@@ -18,7 +20,7 @@ import seedu.address.model.deck.entry.UniqueEntryList;
 public class AddressBook implements ReadOnlyAddressBook {
 
     /*private final UniqueEntryList entries;*/
-    private final UniqueDeckList decks;
+    private final UniqueDeckList observedDecks;
     private UniqueEntryList observedEntries;
     private FilteredList<Entry> filteredEntries;
 
@@ -30,7 +32,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      *   among constructors.
      */
     {
-        decks = new UniqueDeckList();
+        observedDecks = new UniqueDeckList();
         observedEntries = new UniqueEntryList();
         filteredEntries = new FilteredList<>(observedEntries.asUnmodifiableObservableList());
     }
@@ -57,12 +59,43 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     /**
      * This function directly modifies what is seen on the GUI
+     *
      * @param entry refers to the entry added by the user
-     * */
+     */
     public void addEntry(Entry entry) {
         observedEntries.add(entry);
     }
 
+    public Entry getEntry(int index) {
+        return observedEntries.get(index);
+    }
+
+    public int entryListLength() {
+        return observedEntries.length();
+    }
+
+    /**
+     * Resets the observable entry list without clearing the memory of the deck
+     * */
+    public void resetEntryList() {
+        Iterator<Entry> iterator = observedEntries.iterator(); //create iterator
+        ArrayList<Entry> copy = new ArrayList<Entry>(); //initialise a copy
+        while (iterator.hasNext()) { //fill the empty copy ArrayList with the existing entries
+            copy.add(iterator.next()); //this avoids the concurrentModification exception
+        }
+        for (Entry entry : copy) { //for each entry in the copy, delete the same entry in the observedEntries
+            observedEntries.remove(entry); //this changes the GUI
+        }
+    }
+
+    /**
+     * Replaces the current observed entry list when given a UniqueEntryList object
+     * */
+    public void replaceEntryList(UniqueEntryList newEntryList) {
+        for (Entry entry : newEntryList) { //for each entry in the new selected deck entryList
+            observedEntries.add(entry); //add it to the GUI
+        }
+    }
     //// list overwrite operations
     /*
      *
@@ -72,12 +105,13 @@ public class AddressBook implements ReadOnlyAddressBook {
     /*public void setEntries(List<Entry> entries) {
         this.entries.setEntries(entries);
     }*/
+
     /**
      * Replaces the contents of the entry list with {@code entries}.
      * {@code entries} must not contain duplicate entries.
      */
     public void setDecks(List<Deck> decks) {
-        this.decks.setDecks(decks);
+        this.observedDecks.setDecks(decks);
     }
 
     /**
@@ -96,7 +130,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      */
     public boolean hasDeck(Deck deck) {
         requireNonNull(deck);
-        return decks.contains(deck);
+        return observedDecks.contains(deck);
     }
 
     /**
@@ -104,7 +138,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      * {@code key} must exist in the word bank.
      */
     public void removeDeck(Deck key) {
-        decks.remove(key);
+        observedDecks.remove(key);
     }
 
     /**
@@ -112,14 +146,14 @@ public class AddressBook implements ReadOnlyAddressBook {
      * The deck must not already exist in the word bank.
      */
     public void addDeck(Deck deck) {
-        decks.add(deck);
+        observedDecks.add(deck);
     }
 
     //// util methods
 
     @Override
     public String toString() {
-        return decks.asUnmodifiableObservableList().size() + " decks";
+        return observedDecks.asUnmodifiableObservableList().size() + " decks";
     }
 
     /*@Override
@@ -129,20 +163,26 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     @Override
     public ObservableList<Deck> getDeckList() {
-        return decks.asUnmodifiableObservableList();
+        return observedDecks.asUnmodifiableObservableList();
     }
 
     @Override
     public boolean equals(Object other) {
         return other == this // short circuit if same object
                 || (other instanceof AddressBook // instanceof handles nulls
-                && decks.equals(((AddressBook) other).decks));
+                && observedDecks.equals(((AddressBook) other).observedDecks));
     }
 
     @Override
     public int hashCode() {
-        return decks.hashCode();
+        return observedDecks.hashCode();
     }
+
+    public void setEntry(Entry target, Entry editedEntry) {
+        requireNonNull(editedEntry);
+        observedEntries.setEntry(target, editedEntry);
+    }
+
 }
 
 /// entry-level operations

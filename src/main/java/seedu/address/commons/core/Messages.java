@@ -13,4 +13,6 @@ public class Messages {
 
     public static final String MESSAGE_ENTRIES_LISTED_OVERVIEW = "%1$d entries listed!";
 
+    public static final String MESSAGE_EMPTY_DECK = "Deck is empty!";
+
 }

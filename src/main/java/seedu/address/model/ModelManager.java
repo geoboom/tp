@@ -5,7 +5,6 @@ import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
@@ -18,6 +17,9 @@ import seedu.address.commons.core.index.Index;
 import seedu.address.model.deck.Deck;
 import seedu.address.model.deck.entry.Entry;
 import seedu.address.model.deck.entry.UniqueEntryList;
+import seedu.address.model.play.Leitner;
+import seedu.address.model.view.CurrentView;
+import seedu.address.model.view.View;
 
 
 /**
@@ -28,11 +30,15 @@ public class ModelManager implements Model {
 
     private final AddressBook addressBook;
     private final UserPrefs userPrefs;
+    private CurrentView currentView;
     /*private final FilteredList<Entry> filteredEntries;*/
     private final FilteredList<Deck> filteredDecks;
     private Optional<Index> currentDeckIndex;
-
     private Deck observedDeck;
+    private Leitner leitner;
+    private int quizLength = 2;
+    private int currentIndex = 0;
+    private int lastScore = 0;
 
 
     /**
@@ -49,6 +55,7 @@ public class ModelManager implements Model {
         /*filteredEntries = new FilteredList<>(this.addressBook.getEntryList());*/
         filteredDecks = new FilteredList<>(this.addressBook.getDeckList());
         currentDeckIndex = Optional.empty();
+        this.currentView = new CurrentView(View.START_VIEW);
     }
 
     public ModelManager() {
@@ -89,7 +96,17 @@ public class ModelManager implements Model {
         requireNonNull(addressBookFilePath);
         userPrefs.setAddressBookFilePath(addressBookFilePath);
     }
+    //=========== Current View =============================================================================
 
+    @Override
+    public void setCurrentView(View view) {
+        this.currentView.setView(view);
+    }
+
+    @Override
+    public View getCurrentView() {
+        return this.currentView.getView();
+    }
     //=========== Word Bank ================================================================================
 
     @Override
@@ -111,6 +128,7 @@ public class ModelManager implements Model {
 
     @Override
     public void deleteEntry(Entry target) {
+        requireNonNull(target);
         Deck currentDeck = getCurrentDeck();
         currentDeck.removeEntry(target);
         addressBook.getObservedEntries().remove(target);
@@ -119,11 +137,13 @@ public class ModelManager implements Model {
     /**
      * This function takes the entry and adds it to the deck entry list as well as the observedEntries in the
      * AddressBook
+     *
      * @param entry refers to the entry inputted by the user
      */
 
     @Override
     public void addEntry(Entry entry) {
+        requireNonNull(entry);
         Deck currentDeck = getCurrentDeck();
         currentDeck.addEntry(entry);
         addressBook.getObservedEntries().add(entry);
@@ -159,7 +179,6 @@ public class ModelManager implements Model {
     @Override
     public void selectDeck(Index index) {
         currentDeckIndex = Optional.of(index);
-        //selectCommand.execute also called the function (below) replaceEntryList()
     }
 
     /**
@@ -169,39 +188,21 @@ public class ModelManager implements Model {
      */
     @Override
     public void replaceEntryList() {
-        UniqueEntryList observedList = getCurrentDeck().getEntries(); //get selected deck
-        Iterator<Entry> iterator = addressBook.getObservedEntries().iterator(); //create iterator
-        ArrayList<Entry> copy = new ArrayList<Entry>(); //initialise a copy
-        while (iterator.hasNext()) { //fill the empty copy ArrayList with the existing entries
-            copy.add(iterator.next()); //this avoids the concurrentModification exception
-        }
-        for (Entry entry : copy) { //for each entry in the copy, delete the same entry in the observedEntries
-            addressBook.getObservedEntries().remove(entry); //this changes the GUI
-        }
-
-        for (Entry entry : observedList) { //for each entry in the new selected deck entryList
-            addressBook.getObservedEntries().add(entry); //add it to the GUI
-        }
-        // note: you can use a void function to change the ui apparently
+        UniqueEntryList newEntryList = getCurrentDeck().getEntries();
+        addressBook.resetEntryList();
+        addressBook.replaceEntryList(newEntryList);
     }
 
     @Override
     public void clearEntryList() {
-        Iterator<Entry> iterator = addressBook.getObservedEntries().iterator();
-        ArrayList<Entry> copy = new ArrayList<>();
-        while (iterator.hasNext()) {
-            copy.add(iterator.next());
-        }
-        for (Entry entry: copy) {
-            addressBook.getObservedEntries().remove(entry);
-        }
+        addressBook.resetEntryList();
     }
 
 
     @Override
     public Deck getCurrentDeck() {
         if (currentDeckIndex.equals(Optional.empty())) {
-            logger.info("currentDeckIndex is 0");
+            logger.info("Current deck index is 0");
             return null;
         }
         return filteredDecks.get(currentDeckIndex.get().getZeroBased());
@@ -217,14 +218,10 @@ public class ModelManager implements Model {
      */
     @Override
     public ObservableList<Entry> getFilteredEntryList() {
-        //keeps returning null causing null error
         if (this.getCurrentDeck() == null) {
             logger.info("Current Deck is null");
             return addressBook.getFilteredEntries();
         }
-        Deck currentDeck = getCurrentDeck();
-        System.out.println(currentDeck.getDeckName());
-        System.out.println(currentDeck.getEntryList());
         return addressBook.getFilteredEntries();
     }
 
@@ -233,19 +230,8 @@ public class ModelManager implements Model {
         requireNonNull(predicate);
         Deck currentDeck = getCurrentDeck();
         currentDeck.updateFilteredEntryList(predicate);
-
-        Iterator<Entry> iterator = addressBook.getObservedEntries().iterator(); //create iterator
-        ArrayList<Entry> copy = new ArrayList<Entry>(); //initialise a copy
-        while (iterator.hasNext()) { //fill the empty copy ArrayList with the existing entries
-            copy.add(iterator.next()); //this avoids the concurrentModification exception
-        }
-        for (Entry entry : copy) { //for each entry in the copy, delete the same entry in the observedEntries
-            addressBook.getObservedEntries().remove(entry); //this changes the GUI
-        }
-
-        for (Entry entry : currentDeck.getFilteredEntryList()) { //for each entry in filtered list
-            addressBook.getObservedEntries().add(entry); //add it to the GUI
-        }
+        addressBook.resetEntryList();
+        addressBook.replaceEntryList(currentDeck.getEntries());
     }
 
     /**
@@ -254,11 +240,6 @@ public class ModelManager implements Model {
      */
     @Override
     public ObservableList<Deck> getFilteredDeckList() {
-        /*UniqueDeckList udl = new UniqueDeckList();
-        udl.add(new Deck(new DeckName("deck_1")));
-        udl.add(new Deck(new DeckName("deck_2")));
-        udl.add(new Deck(new DeckName("deck_3")));
-        return udl.asUnmodifiableObservableList();*/
         return filteredDecks;
     }
 
@@ -286,4 +267,138 @@ public class ModelManager implements Model {
                 && userPrefs.equals(other.userPrefs)
                 && filteredDecks.equals(other.filteredDecks);
     }
+
+    //====Games=====
+
+    /**
+     * Initializes a new flashcard game by creating a new Leitner object. If memory has records of the deck being
+     * played before, the Leitner object can be created using the entry list from memory (still implementing). If
+     * memory has no records of the deck being played, the Leitner object is created using a random shuffle of the
+     * exisiting entries.
+     */
+    @Override
+    public void newGame() {
+        UniqueEntryList observedList = getCurrentDeck().getEntries(); //get selected deck
+        leitner = new Leitner(observedList); //use exisiting deck or from memory
+        quizLength = leitner.getEntries().size();
+        currentIndex = 0;
+        addressBook.resetEntryList();
+        addressBook.replaceEntryList(leitner.getUniqueEntryList());
+    }
+
+    /**
+     * Gets called by either a PlayCommand or a StopCommand. Replaces the current observed entry list in addressbook
+     * by the original entries. Score is saved from the leitner object. The next quiz is also generated from the
+     * Leitner object and can be stored in memory. The UI is updated with the new score and the Leitner field of
+     * ModelManager is deleted.
+     */
+    @Override
+    public String endGame() {
+        replaceEntryList();
+        String score = leitner.getScore();
+        lastScore = leitner.getScoreValue();
+
+        leitner.organizeQuizNextAttempt();
+        ArrayList<Entry> nextQuiz = leitner.getQuizNextAttempt(); //save this to memory
+
+        this.currentView.setView(View.SCORE_VIEW);
+
+        leitner = null; //delete leitner
+        return score;
+    }
+
+    /**
+     * Initiated from the PlayCommand. Takes in a String answerGiven from the user via the UI and checks if the
+     * answer is a correct, close to correct, or wrong.
+     * The edit distance between the correctAnswer and answerGiven is calculated via withinEditDistance and if the
+     * distance is 1, the answerGiven is considered almost correct.
+     * If the answer is correct, the score is incremented in the
+     * Leitner object and the correctAnsweredEntries field in leitner object is updated with the entry. The same
+     * occurs if the answer is correct except a different message is logged.
+     * If the answer is wrong, the score is not incremented and the wrongAnsweredEntries field in leitner object is
+     * updated
+     * The entry is swapped with the correct entry in addressbook and the currentIndex is incremented.
+     *
+     * @param answerGiven refers to the user input
+     */
+    @Override
+    public void playGame(String answerGiven) {
+        String correctAnswer = leitner.getAnswers().get(currentIndex).toString();
+        Entry entryToAdd = leitner.getEntries().get(currentIndex);
+        Entry entryToRemove = addressBook.getObservedEntries().get(currentIndex);
+        int numEditDistance = editDistance(answerGiven, correctAnswer,
+                answerGiven.length(), correctAnswer.length());
+        boolean isWithinEditDistance = numEditDistance == 1; //editDistance can only be maximum 1
+
+        if (currentIndex == quizLength) {
+            replaceEntryList();
+        } else if (answerGiven.equals(correctAnswer)) {
+            leitner.correctAnswered(entryToAdd);
+            leitner.incrementScore();
+            logger.info(String.format("Answer given was %s, the correct answer was %s, Correct answer given",
+                    answerGiven, correctAnswer));
+        } else if (isWithinEditDistance) {
+            leitner.correctAnswered(entryToAdd);
+            leitner.incrementScore();
+            logger.info(String.format("within edit distance of %s, Correct answer given", numEditDistance));
+        } else {
+            leitner.wrongAnswered(entryToAdd);
+            logger.info(String.format("Answer given was %s, the correct answer was %s, Wrong answer given",
+                    answerGiven, correctAnswer));
+        }
+
+        addressBook.setEntry(entryToRemove, entryToAdd); //swaps entry in GUI
+        currentIndex++;
+    }
+
+    @Override
+    public Leitner getLeitner() {
+        return this.leitner;
+    }
+
+    @Override
+    public int getCurrentIndex() {
+        return this.currentIndex;
+    }
+
+    @Override
+    public boolean checkScore() {
+        return currentIndex == quizLength - 1;
+    }
+
+    @Override
+    public boolean checkScoreTwo() {
+        return currentIndex == quizLength;
+    }
+
+    @Override
+    public int getLastScore() {
+        return this.lastScore;
+    }
+
+    /**
+     * A dynamic program used to calculate edit distance between two strings
+     */
+    @Override
+    public int editDistance(String answer, String correctAnswer, int m, int n) {
+        assert (m < Integer.MAX_VALUE && n < Integer.MAX_VALUE);
+        int[][] dp = new int[m + 1][n + 1];
+        for (int i = 0; i <= m; i++) {
+            for (int j = 0; j <= n; j++) {
+                if (i == 0) {
+                    dp[i][j] = j;
+                } else if (j == 0) {
+                    dp[i][j] = i;
+                } else if (answer.charAt(i - 1) == correctAnswer.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else {
+                    dp[i][j] = 1 + Math.min(dp[i][j - 1], Math.min(dp[i - 1][j], dp[i - 1][j - 1]));
+                }
+            }
+        }
+        return dp[m][n];
+
+    }
+
+    //====EndGames====
 }

@@ -13,6 +13,8 @@ src/main/resources/docs/
 /config.json
 /preferences.json
 /*.log.*
+/addressbook.log.0
+/addressbook.log.0.1
 
 # Test sandbox files
 src/test/data/sandbox/
@@ -20,3 +22,10 @@ src/test/data/sandbox/
 # MacOS custom attributes files created by Finder
 .DS_Store
 docs/_site/
+
+
+src/main/data/addressbook.json
+src/main/config.json
+src/main/preferences.json
+src/main/addressbook.log.0
+src/main/addressbook.log.0.lck

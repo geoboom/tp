@@ -8,6 +8,8 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.index.Index;
 import seedu.address.model.deck.Deck;
 import seedu.address.model.deck.entry.Entry;
+import seedu.address.model.play.Leitner;
+import seedu.address.model.view.View;
 
 /**
  * The API of the Model component.
@@ -132,4 +134,34 @@ public interface Model {
      * Deletes entries on the GUI when clear command is called.
      */
     void clearEntryList();
+
+    //game commands
+    void newGame();
+
+    String endGame();
+
+    void playGame(String answer);
+
+    boolean checkScore();
+
+    boolean checkScoreTwo();
+
+    int editDistance(String answer, String correctAnswer, int answerLength, int correctAnswerLength);
+    //view methods
+    /**
+     * Changes the current view of the system
+     */
+    void setCurrentView (View view);
+
+    /**
+     * Gets the current view of the system
+     */
+    View getCurrentView();
+
+    //UI methods
+    Leitner getLeitner();
+
+    int getCurrentIndex();
+
+    int getLastScore();
 }

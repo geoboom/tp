@@ -10,6 +10,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.deck.entry.Entry;
+import seedu.address.model.view.View;
 
 /**
  * Adds an entry to the word bank.
@@ -52,6 +53,7 @@ public class AddCommand extends Command {
 
         model.addEntry(toAdd);
         model.replaceEntryList();
+        model.setCurrentView(View.ENTRY_VIEW);
         return new CommandResult(String.format(MESSAGE_SUCCESS, toAdd));
     }
 

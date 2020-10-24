@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
@@ -17,6 +18,13 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.logic.phase.exceptions.PhaseInvalidException;
+import seedu.address.model.view.View;
+import seedu.address.ui.deck.DeckListPanel;
+import seedu.address.ui.entry.EntryListPanel;
+import seedu.address.ui.panels.QuizPanel;
+import seedu.address.ui.panels.ScorePanel;
+import seedu.address.ui.panels.StartPanel;
+import seedu.address.ui.panels.StatisticsPanel;
 
 
 /**
@@ -26,17 +34,24 @@ import seedu.address.logic.phase.exceptions.PhaseInvalidException;
 public class MainWindow extends UiPart<Stage> {
 
     private static final String FXML = "MainWindow.fxml";
+    private static final int START_INDEX = 0;
+    private static final int ENTRY_INDEX = 1;
+    private static final int QUIZ_INDEX = 2;
+    private static final int STATISTICS_INDEX = 3;
 
     private final Logger logger = LogsCenter.getLogger(getClass());
 
     private Stage primaryStage;
     private Logic logic;
+    private View currentView;
 
     // Independent Ui parts residing in this Ui container
     private EntryListPanel entryListPanel;
     private DeckListPanel deckListPanel;
     private ResultDisplay resultDisplay;
     private HelpWindow helpWindow;
+    private StartPanel startPanel;
+    private StatisticsPanel statisticsPanel;
 
     @FXML
     private StackPane commandBoxPlaceholder;
@@ -45,19 +60,25 @@ public class MainWindow extends UiPart<Stage> {
     private MenuItem helpMenuItem;
 
     @FXML
+    private TabPane tabPanelPlaceholder;
+
+    @FXML
+    private StackPane startPanelPlaceholder;
+
+    @FXML
     private StackPane entryListPanelPlaceholder;
+
+    @FXML
+    private StackPane quizPanelPlaceholder;
+
+    @FXML
+    private StackPane statisticsPanelPlaceholder;
 
     @FXML
     private StackPane resultDisplayPlaceholder;
 
     @FXML
     private StackPane statusbarPlaceholder;
-
-    @FXML
-    private MenuItem Deck1;
-
-    @FXML
-    private MenuItem Deck2;
 
     @FXML
     private StackPane deckListPanelPlaceholder;
@@ -71,6 +92,7 @@ public class MainWindow extends UiPart<Stage> {
         // Set dependencies
         this.primaryStage = primaryStage;
         this.logic = logic;
+        this.currentView = logic.getCurrentView();
 
         // Configure the UI
         setWindowDefaultSize(logic.getGuiSettings());
@@ -122,6 +144,9 @@ public class MainWindow extends UiPart<Stage> {
      * Fills up all the placeholders of this window.
      */
     void fillInnerParts() {
+        startPanel = new StartPanel();
+        startPanelPlaceholder.getChildren().add(startPanel.getRoot());
+
         deckListPanel = new DeckListPanel(logic.getFilteredDeckList()); //get the initial decklist
         deckListPanelPlaceholder.getChildren().add(deckListPanel.getRoot());
 
@@ -178,6 +203,36 @@ public class MainWindow extends UiPart<Stage> {
         primaryStage.hide();
     }
 
+    private void handleChangeTab() {
+        currentView = logic.getCurrentView();
+
+        switch (currentView) {
+        case ENTRY_VIEW:
+            tabPanelPlaceholder.getSelectionModel().select(ENTRY_INDEX);
+            break;
+        case QUIZ_VIEW:
+        case SCORE_VIEW:
+            tabPanelPlaceholder.getSelectionModel().select(QUIZ_INDEX);
+            break;
+        case STATISTICS_VIEW:
+            tabPanelPlaceholder.getSelectionModel().select(STATISTICS_INDEX);
+            break;
+        default:
+            tabPanelPlaceholder.getSelectionModel().select(START_INDEX);
+            break;
+        }
+    }
+
+    private void handleQuizMode() {
+        QuizPanel quizPanel = new QuizPanel(logic.getLeitner(), logic.getCurrentIndex());
+        quizPanelPlaceholder.getChildren().add(quizPanel.getRoot());
+    }
+
+    private void handleScorePanel() {
+        ScorePanel scorePanel = new ScorePanel(logic.getLastScore(), logic.getFilteredEntryList().size());
+        quizPanelPlaceholder.getChildren().add(scorePanel.getRoot());
+    }
+
     public EntryListPanel getEntryListPanel() {
         return entryListPanel;
     }
@@ -212,6 +267,18 @@ public class MainWindow extends UiPart<Stage> {
 
             if (commandResult.isExit()) {
                 handleExit();
+            }
+
+            if (logic.getCurrentView() == View.SCORE_VIEW) {
+                handleScorePanel();
+            }
+
+            if (logic.getCurrentView() == View.QUIZ_VIEW) {
+                handleQuizMode();
+            }
+
+            if (logic.getCurrentView() != this.currentView) {
+                handleChangeTab();
             }
 
             return commandResult;

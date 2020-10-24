@@ -11,6 +11,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.deck.entry.Entry;
+import seedu.address.model.view.View;
 
 /**
  * Deletes an entry identified using it's displayed index from the address book.
@@ -47,6 +48,7 @@ public class DeleteCommand extends Command {
 
         Entry entryToDelete = lastShownList.get(targetIndex.getZeroBased());
         model.deleteEntry(entryToDelete);
+        model.setCurrentView(View.ENTRY_VIEW);
         return new CommandResult(String.format(MESSAGE_DELETE_ENTRY_SUCCESS, entryToDelete));
     }
 

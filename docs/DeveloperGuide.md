@@ -2,8 +2,6 @@
 
 ### Table of Contents
 
-- [Green Tea Developer Guide (v1.2)](#green-tea-developer-guide-v12)
-  - [Table of Contents](#table-of-contents)
 - [1. Introduction](#1-introduction)
   - [1.1 Purpose](#11-purpose)
   - [1.2 Audience](#12-audience)
@@ -11,11 +9,13 @@
 - [2. Setting up, getting started](#2-setting-up-getting-started)
 - [3. Design](#3-design)
   - [3.1 Component Overview](#31-component-overview)
-  - [3.2 Common classes](#-32-common-classes)
-  - [3.3 UI component](#-33-ui-component)
-  - [3.4 Logic component](#-34-logic-component)
-  - [3.5 Model component](#-35-model-component)
-  - [3.6 Storage component](#--36-storage-component)
+  - [How the architecture components interact with one another](#how-the-architecture-components-interact-with-one-another)
+  - [3.2 Common classes](#32-common-classes)
+  - [3.3 UI component](#33-ui-component)
+  - [3.4 Logic component](#34-logic-component)
+  - [3.5 Model component](#35-model-component)
+  - [3.6 Storage component](#36-storage-component)
+  - [3.7 PhaseManager component](#37-phasemanager-component)
 - [4. Implementation](#4-implementation)
   - [4.1 Deck System](#41-deck-system)
   - [4.2 Select Deck](#42-select-deck)
@@ -43,25 +43,26 @@ This document details the architecture, design decisions and implementations for
 
 ### 1.2 Audience
 
-The intended audience of this document is the developers and testers of Green Tea.
+The intended audience of this document are the developers and testers of Green Tea.
 
 ### 1.3 Glossary
 
-|           |                            |
+| Syntax    | Description     |
 | --------- | -------------------------- |
 | Deck      | A collection of entries    |
 | Entry     | A word and its translation |
 | Word Bank | A collection of decks.     |
+<div><sup>Table 1. Syntax and Description of Technical Terms in GreenTea</sup></div>
 
 ---
 
-## 2. **Setting up, getting started**
+## 2. Setting up, getting started
 
 Refer to the guide [_Setting up and getting started_](SettingUp.md).
 
 ---
 
-## 3. **Design**
+## 3. Design
 
 This section details the various components of the application. It covers the internal structure of each component and
 how the components work together with one another.
@@ -108,7 +109,7 @@ For example, the `Logic` component (see the class diagram given below) defines i
 
 <p align="center"> Figure 2. Example of a component's API and functionality
 
-#### **How the architecture components interact with one another**
+#### How the architecture components interact with one another
 
 The _Sequence Diagram_ below shows how the components interact with each other for the scenario where the user issues the command `remove 1`.
 
@@ -117,7 +118,7 @@ The _Sequence Diagram_ below shows how the components interact with each other f
 
 The sections below give more details of each component.
 
-### <a name="common-classes"></a> 3.2 Common classes
+### 3.2 Common classes
 
 Common classes are classes used by multiple components. Common classes include:
 
@@ -127,7 +128,7 @@ Common classes are classes used by multiple components. Common classes include:
 - `GuiSettings`: Contains the GUI settings.
 - `LogsCenter`: Writes messages to the console and a log file. Records the state of the program as the app is running.
 
-### <a name="ui-component"></a> 3.3 UI component
+### 3.3 UI component
 
 ![Structure of the UI Component](images/UiClassDiagram.png)
 
@@ -165,7 +166,7 @@ For example, the layout of the [`MainWindow`](https://github.com/AY2021S1-CS2103
 
 `StatusBarFooter` - returns the path of the file retrieved
 
-### <a name="logic-component"></a> 3.4 Logic component
+### 3.4 Logic component
 
 ![Structure of the Logic Component](images/LogicClassDiagram.png)
 
@@ -175,7 +176,9 @@ For example, the layout of the [`MainWindow`](https://github.com/AY2021S1-CS2103
 <p align="center"> Figure 5. Logic component class relationship diagram
 
 1. `Logic` uses the `WorkBankParser` class to parse the user command.
-1. This results in a `Command` object which is executed by the `LogicManager`.
+1. This results in a `Command` object which is passed to `LogicManager`.
+   1. The `Command` is first checked by `PhaseManager` whether it can be executed in the current `Phase`.
+   1. If yes, execute the `Command`; otherwise, throw `PhaseIncorrectException`.
 1. The command execution can affect the `Model` (e.g. adding a deck).
 1. The result of the command execution is encapsulated as a `CommandResult` object which is passed back to the `Ui`.
 1. In addition, the `CommandResult` object can also instruct the `Ui` to perform certain actions, such as displaying help to the user.
@@ -186,13 +189,13 @@ Given below is the Sequence Diagram for interactions within the `Logic` componen
 
 <p align="center"> Figure 6. Interactions between different parts of the logic component
 
-### <a name="model-component"></a> 3.5 Model component
+### 3.5 Model component
 
 ![Structure of the Model Component](images/ModelClassDiagram.png)
 
 <p align="center"> Figure 7. Model component class relationship diagram
 
-The diagram above shows a general overview of the model component. The diagram below will give more details about the
+Figure 7 shows a general overview of the model component. The diagram below will give more details about the
 word bank section of the model component.
 
 ![Structure of the Model Component](images/ModelWordBankDiagram.png)
@@ -204,11 +207,12 @@ word bank section of the model component.
 The `Model`
 
 - stores a `UserPref` object that represents the user’s preferences.
-- stores the word bank data.
-- exposes an unmodifiable `ObservableList<Deck>` and `ObservableList<Entry>` that can be 'observed'. E.g. the UI can be bound to this list so that the UI automatically updates when the data in the list change.
+- stores a `FilteredList<Deck>` object that maintain`s the current list of decks in memory.
+- exposes an unmodifiable `ObservableList<Deck>`  and `ObservableList<Entry>`
+that can be 'observed'. E.g. the UI can be bound to this list so that the UI automatically updates when the data in the list change.
 - does not depend on any of the other three components.
 
-### <a name="storage-component"></a> 3.6 Storage component
+### 3.6 Storage component
 
 ![Structure of the Storage Component](images/StorageClassDiagram.png)
 
@@ -219,15 +223,36 @@ The `Model`
 The `Storage` component,
 
 - can save `UserPref` objects in json format and read it back.
-- can save the word bank data in json format and read it back.
+- can save the word bank data, such as `Deck`, `Entry`, `Word` and `Translation` in json format and read it back.
+- can save the statistics and scores of each individual quiz
+``
+Each `Word` and `Translation` is saved in a `JsonAdaptedWord `and `JsonAdaptedTranslation` object respectively.
+Each `Entry` is saved in a `JsonAdaptedEntry` object, consisting of a `JsonAdaptedWord` and `JsonAdaptedTranslation`.
+Each `Deck` is saved in a `JsonAdaptedDeck` object, consisting of a list of `JsonAdaptedEntry`.
+
+This format allows the files to be saved in json format and be read back accurately.
+
+### 3.7 PhaseManager component
+
+![Structure of PhaseManager Component]()
+
+<p align="center"> Figure 10. PhaseManager component diagram (WIP)
+
+**API** : [`PhaseManager.java`](https://github.com/AY2021S1-CS2103T-T09-4/tp/blob/master/src/main/java/seedu/address/logic/phase/PhaseManager.java)
+
+The `PhaseManager` component serves the following functions:
+
+- Keep track of the current `Phase` (`LOBBY`, `QUIZ`, `RESULTS`) the app is in.
+- Validate whether a `Command` can be executed in the current `Phase`.
+- Check whether a `Command` is a `PhaseTransitionCommand` and if so, update the `Phase` to be the `nextPhase` specified by this `PhaseTransitionCommand`.
 
 ---
 
-## 4. **Implementation**
+## 4. Implementation
 
 This section describes some noteworthy details on how and why certain features are implemented.
 
-### 4.1 Deck System
+### 4.1 Deck System (Melanie)
 
 This feature allows the user to create multiple lists of entries rather than having
 all entries together in the same list. The user could have different decks
@@ -244,13 +269,15 @@ E.g.
 The rationale behind the deck system is so that users will be better able to organize their entries.
 A deck system will also allow the flashcard system, a proposed feature, to be implemented more easily.
 
-### 4.2 Select Deck
+### 4.2 Select Deck (Melanie)
 
 This feature requires the user to select a deck (using `select <index>`) in order to change the contents of the deck.
 Once a deck is selected, entry level operations such as `add`, `delete`, `find`, `list` can be performed.
 
 The implementation of this feature requires the GUI to be updated whenever a deck is selected. This is done by using the
-UI, Logic and Model components.
+UI, Logic and Model components. The selected deck is retrieved from `FilteredList<Deck>` in the model component and replaces
+the current entries in the `UniqueEntryList` object of WordBank causing the UI to change accordingly. A similar
+approach is done for other commands that changes the UI such as `new <deck>` and `clear` command
 
 #### Design Considerations
 
@@ -264,18 +291,48 @@ UI, Logic and Model components.
   - Pros: Single command for users to execute
   - Cons: May cause confusion to the users.
 
-### 4.3 \[Proposed\] Flashcard System
+### 4.3 Flashcard System (Gabriel)
 
-The flashcard system would allow the user to choose to practice in whichever deck
-he wishes.
+Three additional commands are used for the flashcard system -  PlayCommand, StopCommand and AnswerCommand.
 
-The methodology behind GreenTea's flashcard system will be based on the Leitner System (https://en.wikipedia.org/wiki/Leitner_system)
-The Letiner system is a proven quizzing system that increases the user's rate of learning by
-using spaced repetition. In the Leitner system, flashcards are sorted based on the user's ability to answer them. Correctly
-answered flashcards are put at the end of the question queue and incorrectly answered
-flashcards are placed at the front.
+By default, StopCommand and AnswerCommand cannot be accessed by the user until a PlayCommand is typed by the user.
 
-_{Feature will be added in v1.3}_
+![Sequence Diagram of Play Command](images/PlayCommandSequenceDiagram.png)
+<p align="center"> Figure 11. Sequence Diagram of Play Command
+
+With reference to Figure 11, after a PlayCommand is created:
+* A boolean isPlayMode in AddressBookParser becomes True (not shown yet as the implementation might change).
+* All following user inputs are treated as either an AnswerCommand or a StopCommand
+* A Leitner object is created that stores the current entries of the selected deck and shuffles them
+* The Leitner object also forms questions and answers list based on the shuffled list
+
+![Sequence Diagram of Answer Command](images/AnswerCommandSequenceDiagram.png)
+<p align="center"> Figure 12. Sequence Diagram of Play Command
+
+With reference to figure 12, when the user types a AnswerCommand into the system:
+ * The AddressBookParser first checks if it is current is in play mode via the boolean isPlayMode
+ * If it is not in play mode, an error message is shown to the user via the UI
+ * If it is in play mode, an AnswerCommand containing hte user input is sent to the model and checked against
+  the current question in Leitner.java
+ * The response (correct / wrong answer) is then relayed backed to the user and the next question is loaded.
+ * The process ends when the Leitner.java has no more question to ask (not shown as implementation might change)
+
+__The diagram for this process will be created after the flashcard system is implemented__
+
+#### Design Considerations:
+
+##### Aspect: Type of flashcard system
+
+- **Alternative 1 (current choice)** : Leitner System
+  - Pros: The Letiner system is a proven quizzing system that increases the user's rate of learning by
+          using spaced repetition. Flashcards are sorted based on the user's ability to answer them. Correctly
+          answered flashcards are put at the end of the question queue and incorrectly answered
+          flashcards are placed at the front.
+          (https://en.wikipedia.org/wiki/Leitner_system)
+  - Cons: More difficult to implement
+- **Alternative 2** : Random shuffling system
+  - Pros: Easier to implement
+  - Cons: Users may not learn as effectively
 
 ### 4.4 \[Proposed\] Data Analysis
 
@@ -295,11 +352,11 @@ display to the user. These include:
 - Language mastery
 - Progress in each deck
 
-_{Feature will be added in v1.3}_
+_{Feature will be added in v1.3.2}_
 
 ---
 
-## 5. **Documentation, logging, testing, configuration, dev-ops**
+## 5. Documentation, logging, testing, configuration, dev-ops
 
 - [Documentation guide](Documentation.md)
 - [Testing guide](Testing.md)
@@ -309,7 +366,7 @@ _{Feature will be added in v1.3}_
 
 ---
 
-## 6. **Appendix: Requirements**
+## 6. Appendix: Requirements
 
 ### 6.1 Product scope
 
@@ -367,7 +424,7 @@ _{More to be added}_
 
 (For all use cases below, the **System** is `GreenTea` and the **Actor** is the `user`, unless specified otherwise)
 
-**Use case: View help**
+**Use case 1: View help**
 
 **MSS**
 
@@ -375,7 +432,7 @@ _{More to be added}_
 2.  GreenTea returns a message explaining how to access the help page
     Use case ends.
 
-**Use case: Add a new entry**
+**Use case 2: Add a new entry**
 
 **MSS**
 
@@ -396,7 +453,7 @@ _{More to be added}_
 
   Use case resumes at step 2.
 
-**Use case: List all entries**
+**Use case 3: List all entries**
 
 **MSS**
 
@@ -405,7 +462,7 @@ _{More to be added}_
 
     Use case ends.
 
-**Use case: Edit an entry**
+**Use case 4: Edit an entry**
 
 **MSS**
 
@@ -416,13 +473,13 @@ _{More to be added}_
 
 **Extensions**
 
-- 1a. User fed an invalid index
+- 1a. User gives an invalid index
 
   - 1a1. GreenTea returns an error message
 
   Use case ends.
 
-**Use case: Delete an entry**
+**Use case 5: Delete an entry**
 
 **MSS**
 
@@ -435,26 +492,28 @@ _{More to be added}_
 
 **Extensions**
 
-- 2a. The list is empty.
+- 3a. The given input does not match the format
 
-  Use case ends.
-
-- 3a. The given index is invalid.
-
-  - 3a1. GreenTea shows an error message.
+  - 3a1. GreenTea shows an error message
 
     Use case resumes at step 2.
 
-**Use case: Clear a person**
+- 3b. The given index is invalid.
+
+  - 3b1. GreenTea shows an error message.
+
+    Use case resumes at step 2.
+
+**Use case 6: Clear decks**
 
 **MSS**
 
-1.  User requests to clear entries
-2.  GreenTea clears all entries
+1.  User requests to clear decks
+2.  GreenTea clears all decks
 
     Use case ends.
 
-**Use case: Exit **
+**Use case 7: Exit**
 
 **MSS**
 
@@ -483,7 +542,7 @@ _{More to be added}_
 
 ---
 
-## 7. **Appendix: Instructions for manual testing**
+## 7. Appendix: Instructions for manual testing
 
 Given below are instructions to test the app manually.
 

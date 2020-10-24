@@ -11,6 +11,8 @@ import seedu.address.logic.phase.exceptions.PhaseInvalidException;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.deck.Deck;
 import seedu.address.model.deck.entry.Entry;
+import seedu.address.model.play.Leitner;
+import seedu.address.model.view.View;
 
 /**
  * API of the Logic component
@@ -52,4 +54,24 @@ public interface Logic {
      * Set the user prefs' GUI settings.
      */
     void setGuiSettings(GuiSettings guiSettings);
+
+    /**
+     * Returns the current view of the system to the UI
+     */
+    View getCurrentView();
+
+    /**
+     * Return the current shuffled quiz questions (Leitner)
+     */
+    Leitner getLeitner();
+
+    /**
+     * Returns the current questions that the user is at
+     */
+    int getCurrentIndex();
+
+    /**
+     * Returns the score of the most recent quiz taken by the user
+     */
+    int getLastScore();
 }

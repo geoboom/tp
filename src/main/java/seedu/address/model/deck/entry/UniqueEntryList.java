@@ -17,7 +17,7 @@ import seedu.address.model.deck.exceptions.EntryNotFoundException;
  * entries uses Entry#isSameEntry(Entry) for equality so as to ensure that the entry being added or updated is
  * unique in terms of identity in the UniqueEntryList. However, the removal of an entry uses Entry#equals(Object) so
  * as to ensure that the entry with exactly the same fields will be removed.
- *
+ * <p>
  * Supports a minimal set of list operations.
  *
  * @see Entry#isSameEntry(Entry)
@@ -27,6 +27,18 @@ public class UniqueEntryList implements Iterable<Entry> {
     private final ObservableList<Entry> internalList = FXCollections.observableArrayList();
     private final ObservableList<Entry> internalUnmodifiableList =
             FXCollections.unmodifiableObservableList(internalList);
+
+    public Entry get(int index) {
+        return internalList.get(index);
+    }
+
+    public int length() {
+        return internalList.size();
+    }
+
+    public boolean isEmpty() {
+        return internalList.isEmpty();
+    }
 
     /**
      * Returns true if the list contains an equivalent entry as the given argument.
@@ -113,7 +125,7 @@ public class UniqueEntryList implements Iterable<Entry> {
     public boolean equals(Object other) {
         return other == this // short circuit if same object
                 || (other instanceof UniqueEntryList // instanceof handles nulls
-                        && internalList.equals(((UniqueEntryList) other).internalList));
+                && internalList.equals(((UniqueEntryList) other).internalList));
     }
 
     @Override

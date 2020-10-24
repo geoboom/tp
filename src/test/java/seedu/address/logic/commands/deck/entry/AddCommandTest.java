@@ -1,12 +1,14 @@
 package seedu.address.logic.commands.deck.entry;
 
 import static java.util.Objects.requireNonNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.index.Index;
+import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.entry.AddCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.AddressBook;
@@ -23,6 +26,8 @@ import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.deck.Deck;
 import seedu.address.model.deck.DeckName;
 import seedu.address.model.deck.entry.Entry;
+import seedu.address.model.play.Leitner;
+import seedu.address.model.view.View;
 import seedu.address.testutil.entry.EntryBuilder;
 
 public class AddCommandTest {
@@ -32,14 +37,14 @@ public class AddCommandTest {
         assertThrows(NullPointerException.class, () -> new AddCommand(null));
     }
 
-    //    @Test
-    //    public void execute_entryAcceptedByModel_addSuccessful() throws Exception {
-    //        ModelStubAcceptingEntryAdded modelStub = new ModelStubAcceptingEntryAdded();
-    //        Entry validEntry = new EntryBuilder().build();
-    //        CommandResult commandResult = new AddCommand(validEntry).execute(modelStub);
-    //        assertEquals(String.format(AddCommand.MESSAGE_SUCCESS, validEntry), commandResult.getFeedbackToUser());
-    //        assertEquals(Arrays.asList(validEntry), modelStub.entriesAdded);
-    //    }
+    @Test
+    public void execute_entryAcceptedByModel_addSuccessful() throws Exception {
+        ModelStubAcceptingEntryAdded modelStub = new ModelStubAcceptingEntryAdded();
+        Entry validEntry = new EntryBuilder().build();
+        CommandResult commandResult = new AddCommand(validEntry).execute(modelStub);
+        assertEquals(String.format(AddCommand.MESSAGE_SUCCESS, validEntry), commandResult.getFeedbackToUser());
+        assertEquals(Arrays.asList(validEntry), modelStub.entriesAdded);
+    }
 
     @Test
     public void execute_duplicateEntry_throwsCommandException() {
@@ -192,6 +197,61 @@ public class AddCommandTest {
         public void clearEntryList() {
             throw new AssertionError("This method should not be called.");
         }
+
+        @Override
+        public void newGame() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public String endGame() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void playGame(String answer) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public boolean checkScore() {
+            return true;
+        }
+
+        @Override
+        public boolean checkScoreTwo() {
+            return true;
+        }
+
+        @Override
+        public int editDistance(String answer, String correctAnswer, int answerLength, int correctAnswerLength) {
+            return 10;
+        }
+
+        @Override
+        public void setCurrentView(View view) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public View getCurrentView() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public Leitner getLeitner() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public int getCurrentIndex() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public int getLastScore() {
+            throw new AssertionError("This method should not be called.");
+        }
     }
 
     /**
@@ -260,5 +320,27 @@ public class AddCommandTest {
         public ReadOnlyAddressBook getAddressBook() {
             return new AddressBook();
         }
+
+        @Override
+        public void replaceEntryList() {
+        }
+
+        @Override
+        public void newGame() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public String endGame() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void playGame(String answer) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void setCurrentView(View view) {}
     }
 }
