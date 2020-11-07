@@ -397,7 +397,7 @@ With reference to figure 12, when the user types a AnswerCommand into the system
   - Pros: Easier to implement
   - Cons: Users may not learn as effectively
 
-### 4.3 \[Proposed\] Data Analysis
+### 4.3 Data Analytics / Statistics
 
 Some of the proposed parameters tracked by GreenTea include:
 
